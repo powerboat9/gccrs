@@ -416,6 +416,44 @@ ASTLoweringType::visit (AST::TraitObjectType &type)
 					 type.get_locus (), type.is_dyn ());
 }
 
+HIR::Type *
+ASTLoweringTypeFnReturn::translate (AST::Type *type)
+{
+  ASTLoweringTypeFnReturn resolver;
+  type->accept_vis (resolver);
+
+  rust_assert (resolver.translated != nullptr);
+  resolver.mappings->insert_hir_type (resolver.translated);
+  resolver.mappings->insert_location (
+    resolver.translated->get_mappings ().get_hirid (),
+    resolver.translated->get_locus ());
+
+  return resolver.translated;
+}
+
+void
+ASTLoweringTypeFnReturn::visit(AST::ImplTraitType &type)
+{
+  HIR::InferType *infer = new HIR::InferType (type.get_mappings ().get_hirid (), HIR::TyTy::InferType::InferTypeKind::GENERAL, TyTy::InferType::TypeHint::Default (), type.get_locus ());
+
+  translated = 
+}
+
+HIR::Type *
+ASTLoweringTypeFnParam::translate (AST::Type *type)
+{
+  ASTLoweringTypeFnParam resolver;
+  type->accept_vis (resolver);
+
+  rust_assert (resolver.translated != nullptr);
+  resolver.mappings->insert_hir_type (resolver.translated);
+  resolver.mappings->insert_location (
+    resolver.translated->get_mappings ().get_hirid (),
+    resolver.translated->get_locus ());
+
+  return resolver.translated;
+}
+
 HIR::GenericParam *
 ASTLowerGenericParam::translate (AST::GenericParam *param)
 {

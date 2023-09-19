@@ -84,6 +84,26 @@ private:
   HIR::Type *translated;
 };
 
+class ASTLoweringTypeFnReturn : public ASTLoweringType
+{
+  using ASTLoweringType::visit;
+
+public:
+  static HIR::Type *translate (AST::Type *type);
+
+  void visit (AST::ImplTraitType &type) override;
+};
+
+class ASTLoweringTypeFnParam : public ASTLoweringType
+{
+  using ASTLoweringType::visit;
+
+public:
+  static HIR::Type *translate (AST::Type *type);
+
+  void visit (AST::ImplTraitType &type) override;
+};
+
 class ASTLowerGenericParam : public ASTLoweringBase
 {
   using Rust::HIR::ASTLoweringBase::visit;
