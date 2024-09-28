@@ -396,7 +396,7 @@ void
 TypeCheckContext::insert_variant_definition (HirId id, HirId variant)
 {
   auto it = variants.find (id);
-  rust_assert (it == variants.end ());
+  rust_assert (it == variants.end () || it->second == variant);
 
   variants[id] = variant;
 }
