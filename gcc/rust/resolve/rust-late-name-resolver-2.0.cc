@@ -285,6 +285,8 @@ Late::visit (AST::TypePath &type)
   // maybe we can overload `resolve_path<Namespace::Types>` to only do
   // typepath-like path resolution? that sounds good
 
+  rust_debug_loc (type.get_locus (), "resolving");
+
   // take care of only simple cases
   // TODO: remove this?
   rust_assert (!type.has_opening_scope_resolution_op ());
