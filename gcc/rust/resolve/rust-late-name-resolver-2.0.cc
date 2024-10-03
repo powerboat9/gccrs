@@ -228,7 +228,7 @@ Late::visit (AST::PathInExpression &expr)
   // in a function item` error here?
   // do we emit it in `get<Namespace::Labels>`?
 
-  rust_debug ("[ARTHUR]: %s", expr.as_simple_path ().as_string ().c_str ());
+  rust_debug_loc (expr.get_locus (), "[ARTHUR]: %s", expr.as_simple_path ().as_string ().c_str ());
 
   tl::optional<Rib::Definition> resolved = tl::nullopt;
 

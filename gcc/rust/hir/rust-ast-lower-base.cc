@@ -638,6 +638,7 @@ ASTLoweringBase::lower_generic_args (AST::GenericArgs &args)
 
   for (auto &arg : args.get_generic_args ())
     {
+      rust_debug_loc (arg.get_locus (), "lowering");
       switch (arg.get_kind ())
 	{
 	  case AST::GenericArg::Kind::Type: {
@@ -653,6 +654,7 @@ ASTLoweringBase::lower_generic_args (AST::GenericArgs &args)
 	    break;
 	  }
 	default:
+	  std::cerr << " [ENUM] " << (int) arg.get_kind () << std::endl;
 	  rust_unreachable ();
 	}
     }
