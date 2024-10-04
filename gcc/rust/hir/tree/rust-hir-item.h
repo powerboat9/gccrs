@@ -1325,7 +1325,11 @@ public:
   /* Returns whether the struct is a unit struct - struct defined without
    * fields. This is important because it also means an implicit constant of its
    * type is defined. */
-  bool is_unit_struct () const { return is_unit; }
+  bool is_unit_struct () const {
+    static int count = 0;
+    rust_assert (count++ > 0);
+    return is_unit;
+  }
 
   void accept_vis (HIRFullVisitor &vis) override;
   void accept_vis (HIRStmtVisitor &vis) override;

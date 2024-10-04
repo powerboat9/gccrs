@@ -491,7 +491,7 @@ StructStruct::as_string () const
 {
   std::string str = VisItem::as_string ();
 
-  str += "struct " + struct_name.as_string ();
+  str += "XXXX struct " + struct_name.as_string ();
 
   // generic params
   str += "\n Generic params: ";

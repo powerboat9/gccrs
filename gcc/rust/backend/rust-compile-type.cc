@@ -38,16 +38,24 @@ tree
 TyTyResolveCompile::compile (Context *ctx, const TyTy::BaseType *ty,
 			     bool trait_object_mode)
 {
+  rust_debug_loc (ty->get_locus (), "attempting solve");
+
   TyTyResolveCompile compiler (ctx, trait_object_mode);
   const TyTy::BaseType *destructured = ty->destructure ();
+  rust_debug_loc (ty->get_locus (), destructured->as_string ().c_str ());
   destructured->accept_vis (compiler);
 
   if (compiler.translated != error_mark_node
       && TYPE_NAME (compiler.translated) != NULL)
     {
+      rust_debug ("CANNON");
       // canonicalize the type
       compiler.translated = ctx->insert_compiled_type (compiler.translated);
     }
+
+  rust_assert (compiler.translated != error_mark_node);
+
+  rust_debug_loc (ty->get_locus (), "a-ok");
 
   return compiler.translated;
 }

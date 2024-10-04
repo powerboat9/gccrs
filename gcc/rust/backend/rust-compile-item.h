@@ -34,6 +34,8 @@ public:
 		       bool is_query_mode = false,
 		       location_t ref_locus = UNDEF_LOCATION)
   {
+    rust_debug_loc (item->get_locus (), "compiling");
+
     CompileItem compiler (ctx, concrete, ref_locus);
     item->accept_vis (compiler);
 
