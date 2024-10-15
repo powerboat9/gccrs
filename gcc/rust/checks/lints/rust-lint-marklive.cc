@@ -282,9 +282,12 @@ MarkLive::find_ref_node_id (NodeId ast_node_id, NodeId &ref_node_id)
       auto nr_ctx
 	= Resolver2_0::ImmutableNameResolutionContext::get ().resolver ();
 
+      rust_debug ("we're ok?");
       nr_ctx.lookup (ast_node_id).map ([&ref_node_id] (NodeId resolved) {
 	ref_node_id = resolved;
+	rust_debug ("yes");
       });
+      rust_debug ("maybe");
     }
   else
     {
