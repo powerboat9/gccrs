@@ -30,6 +30,8 @@ generics4.rs
 generics5.rs
 generics6.rs
 generics9.rs
+issue-1019.rs
+issue-1034.rs
 issue-1130.rs
 issue-1173.rs
 issue-1272.rs
@@ -45,6 +47,9 @@ issue-2036.rs
 issue-2043.rs
 issue-2136-2.rs
 issue-2142.rs
+issue-2105.rs
+issue-2190-1.rs
+issue-2190-2.rs
 issue-2238.rs
 issue-2330.rs
 issue-2479.rs
@@ -99,6 +104,7 @@ self-path1.rs
 self-path2.rs
 sizeof-stray-infer-var-bug.rs
 struct-expr-parse.rs
+traits12.rs
 traits3.rs
 traits6.rs
 traits7.rs
@@ -126,16 +132,10 @@ issue-266.rs
 additional-trait-bounds2.rs
 auto_traits3.rs
 cmp1.rs
-issue-2190-1.rs
-issue-2190-2.rs
-issue-2105.rs
 issue-2019-1.rs
 issue-2019-2.rs
 issue-2019-3.rs
-issue-1034.rs
-issue-1019.rs
 issue-2304.rs
 issue-2747.rs
 issue-2953-1.rs
-traits12.rs
 # please don't delete the trailing newline
