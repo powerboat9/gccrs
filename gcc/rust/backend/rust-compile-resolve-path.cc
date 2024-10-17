@@ -110,11 +110,7 @@ ResolvePathRef::resolve (const HIR::PathIdentSegment &final_segment,
 	= Resolver2_0::ImmutableNameResolutionContext::get ().resolver ();
 
       auto resolved = nr_ctx.lookup (mappings.get_nodeid ());
-
-      if (!resolved)
-	return attempt_constructor_expression_lookup (lookup, ctx, mappings,
-						      expr_locus);
-
+      rust_assert (resolved.has_value ());
       ref_node_id = *resolved;
     }
   else
@@ -184,6 +180,14 @@ ResolvePathRef::resolve (const HIR::PathIdentSegment &final_segment,
 	  return address_expression (fn, expr_locus);
 	}
     }
+
+  // might be a constructor
+  // FIXME: is there a better way to do this?
+  tree attempt_constructor
+    = attempt_constructor_expression_lookup (lookup, ctx, mappings, expr_locus);
+
+  if (attempt_constructor != error_mark_node)
+    return attempt_constructor;
 
   // let the query system figure it out
   tree resolved_item = query_compile (ref, lookup, final_segment, mappings,
