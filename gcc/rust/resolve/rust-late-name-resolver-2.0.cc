@@ -188,6 +188,14 @@ Late::visit (AST::TypeParam &param)
 }
 
 void
+Late::visit (AST::LoopLabel &label)
+{
+  auto &lifetime = label.get_lifetime ();
+  if (lifetime.get_lifetime_type () == AST::Lifetime::LifetimeType::NAMED)
+    std::ignore = ctx.labels.insert (Identifier (lifetime.get_lifetime_name (), lifetime.get_locus ()), label.get_node_id ());
+}
+
+void
 Late::visit (AST::IdentifierExpr &expr)
 {
   // TODO: same thing as visit(PathInExpression) here?

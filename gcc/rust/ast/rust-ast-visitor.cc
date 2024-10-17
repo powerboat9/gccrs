@@ -574,8 +574,8 @@ void
 DefaultASTVisitor::visit (AST::WhileLoopExpr &expr)
 {
   visit_outer_attrs (expr);
-  visit (expr.get_predicate_expr ());
   visit (expr.get_loop_label ());
+  visit (expr.get_predicate_expr ());
   visit (expr.get_loop_block ());
 }
 
@@ -583,10 +583,10 @@ void
 DefaultASTVisitor::visit (AST::WhileLetLoopExpr &expr)
 {
   visit_outer_attrs (expr);
+  visit (expr.get_loop_label ());
   for (auto &pattern : expr.get_patterns ())
     visit (pattern);
   visit (expr.get_scrutinee_expr ());
-  visit (expr.get_loop_label ());
   visit (expr.get_loop_block ());
 }
 
@@ -594,9 +594,9 @@ void
 DefaultASTVisitor::visit (AST::ForLoopExpr &expr)
 {
   visit_outer_attrs (expr);
+  visit (expr.get_loop_label ());
   visit (expr.get_pattern ());
   visit (expr.get_iterator_expr ());
-  visit (expr.get_loop_label ());
   visit (expr.get_loop_block ());
 }
 
