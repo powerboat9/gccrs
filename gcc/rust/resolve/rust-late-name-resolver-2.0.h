@@ -27,8 +27,6 @@ namespace Resolver2_0 {
 
 class Late : public DefaultResolver
 {
-  using DefaultResolver::visit;
-
 public:
   Late (NameResolutionContext &ctx);
 
@@ -36,11 +34,12 @@ public:
 
   void new_label (Identifier name, NodeId id);
 
+  using DefaultResolver::visit;
+
   // some more label declarations
   void visit (AST::LetStmt &) override;
   // TODO: Do we need this?
   // void visit (AST::Method &) override;
-  void visit (AST::IdentifierPattern &) override;
   void visit (AST::SelfParam &) override;
   void visit (AST::TypeParam &) override;
   void visit (AST::LoopLabel &) override;
@@ -58,9 +57,58 @@ public:
   void visit (AST::GenericArgs &) override;
   void visit (AST::GenericArg &);
 
+  // entering patterns
+  //   - ignore LiteralPattern
+  void visit (AST::IdentifierPattern &) override;
+  //   - ignore WildcardPattern
+  //   - ignore RestPattern
+  void visit (AST::RangePattern &) override;
+  void visit (AST::ReferencePattern &) override;
+  void visit (AST::StructPattern &) override;
+  void visit (AST::TupleStructPattern &) override;
+  void visit (AST::TuplePattern &) override;
+  void visit (AST::GroupedPattern &) override;
+  void visit (AST::SlicePattern &) override;
+  void visit (AST::AltPattern &) override;
+
 private:
   /* Setup Rust's builtin types (u8, i32, !...) in the resolver */
   void setup_builtin_types ();
+};
+
+class LatePattern : public Late
+{
+  using Late::visit;
+
+public:
+  void visit (AST::IdentifierPattern &) override;
+  void visit (AST::AltPattern &) override;
+
+  // override Late::visit for other patterns
+  void visit (AST::RangePattern &p) override { DefaultResolver::visit (p); }
+  void visit (AST::ReferencePattern &p) override { DefaultResolver::visit (p); }
+  void visit (AST::StructPattern &p) override { DefaultResolver::visit (p); }
+  void visit (AST::TupleStructPattern &p) override
+  {
+    DefaultResolver::visit (p);
+  }
+  void visit (AST::TuplePattern &p) override { DefaultResolver::visit (p); }
+  void visit (AST::GroupedPattern &p) override { DefaultResolver::visit (p); }
+  void visit (AST::SlicePattern &p) override { DefaultResolver::visit (p); }
+
+  static void go (NameResolutionContext &ctx, AST::Pattern &pat);
+
+private:
+  using bindings_type
+    = std::unordered_map<std::string, std::pair<location_t, NodeId>>;
+
+  static bindings_type go_inner (NameResolutionContext &ctx, AST::Pattern &pat);
+
+  void handle_ident (std::string s, location_t loc, NodeId id);
+
+  LatePattern (NameResolutionContext &ctx) : Late (ctx) {}
+
+  bindings_type bindings;
 };
 
 // TODO: Add missing mappings and data structures

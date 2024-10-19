@@ -154,18 +154,6 @@ Late::visit (AST::LetStmt &let)
 }
 
 void
-Late::visit (AST::IdentifierPattern &identifier)
-{
-  // do we insert in labels or in values
-  // but values does not allow shadowing... since functions cannot shadow
-  // do we insert functions in labels as well?
-
-  // We do want to ignore duplicated data because some situations rely on it.
-  std::ignore = ctx.values.insert_shadowable (identifier.get_ident (),
-					      identifier.get_node_id ());
-}
-
-void
 Late::visit (AST::SelfParam &param)
 {
   // handle similar to AST::IdentifierPattern
@@ -393,6 +381,154 @@ Late::visit (AST::GenericArg &arg)
     }
 
   DefaultResolver::visit (arg);
+}
+
+void
+Late::visit (AST::IdentifierPattern &pat)
+{
+  LatePattern::go (ctx, pat);
+}
+
+void
+Late::visit (AST::RangePattern &pat)
+{
+  LatePattern::go (ctx, pat);
+}
+
+void
+Late::visit (AST::ReferencePattern &pat)
+{
+  LatePattern::go (ctx, pat);
+}
+
+void
+Late::visit (AST::StructPattern &pat)
+{
+  LatePattern::go (ctx, pat);
+}
+
+void
+Late::visit (AST::TupleStructPattern &pat)
+{
+  LatePattern::go (ctx, pat);
+}
+
+void
+Late::visit (AST::TuplePattern &pat)
+{
+  LatePattern::go (ctx, pat);
+}
+
+void
+Late::visit (AST::GroupedPattern &pat)
+{
+  LatePattern::go (ctx, pat);
+}
+
+void
+Late::visit (AST::SlicePattern &pat)
+{
+  LatePattern::go (ctx, pat);
+}
+
+void
+Late::visit (AST::AltPattern &pat)
+{
+  LatePattern::go (ctx, pat);
+}
+
+void
+LatePattern::go (NameResolutionContext &ctx, AST::Pattern &pat)
+{
+  for (auto &ent : go_inner (ctx, pat))
+    {
+      std::ignore = ctx.values.insert_shadowable (Identifier (ent.first,
+							      ent.second.first),
+						  ent.second.second);
+    }
+}
+
+LatePattern::bindings_type
+LatePattern::go_inner (NameResolutionContext &ctx, AST::Pattern &pat)
+{
+  auto visitor = LatePattern (ctx);
+  visitor.visit (pat);
+  return std::move (visitor.bindings);
+}
+
+void
+LatePattern::handle_ident (std::string s, location_t loc, NodeId id)
+{
+  if (!bindings.insert (std::make_pair (s, std::make_pair (loc, id))).second)
+    {
+      rust_error_at (
+	loc, ErrorCode::E0416,
+	"identifier %qs is bound more than once in the same pattern",
+	s.c_str ());
+    }
+}
+
+void
+LatePattern::visit (AST::IdentifierPattern &pat)
+{
+  handle_ident (pat.get_ident ().as_string (), pat.get_ident ().get_locus (),
+		pat.get_node_id ());
+}
+
+void
+LatePattern::visit (AST::AltPattern &pat)
+{
+  auto &alts = pat.get_alts ();
+
+  std::unordered_multimap<std::string, location_t> missing_errors;
+  std::set<std::string> missing;
+
+  for (size_t i = 0; i < alts.size (); i++)
+    {
+      auto missing_tmp = missing;
+      rust_assert (alts[i].get ());
+      for (auto &ent : go_inner (ctx, *alts[i]))
+	{
+	  auto it = missing_tmp.find (ent.first);
+	  if (it == missing_tmp.end ())
+	    {
+	      handle_ident (ent.first, ent.second.first, ent.second.second);
+	      for (size_t j = 0; j < i; j++)
+		{
+		  missing_errors.insert (
+		    std::make_pair (ent.first, alts[j]->get_locus ()));
+		}
+	      missing.insert (ent.first);
+	    }
+	  else
+	    {
+	      auto res = bindings.find (ent.first);
+	      rust_assert (res != bindings.end ());
+	      ctx.map_usage (Usage (ent.second.second),
+			     Definition (res->second.second));
+	      missing_tmp.erase (it);
+	    }
+	}
+      for (auto &ent : missing_tmp)
+	{
+	  missing_errors.insert (std::make_pair (ent, alts[i]->get_locus ()));
+	}
+    }
+
+  auto it = missing_errors.begin ();
+  while (it != missing_errors.end ())
+    {
+      rich_location r (line_table, pat.get_locus ());
+      auto section_begin = it;
+      do
+	{
+	  r.add_range (it->second);
+      } while (++it != missing_errors.end () && *section_begin == *it);
+      rust_debug_loc (pat.get_locus (), "ok");
+      rust_error_at (r, ErrorCode::E0408,
+		     "variable %qs is not bound in all patterns",
+		     section_begin->first.c_str ());
+    }
 }
 
 } // namespace Resolver2_0
