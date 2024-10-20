@@ -331,6 +331,25 @@ Late::visit (AST::StructExprStruct &s)
 {
   auto resolved = ctx.types.resolve_path (s.get_struct_name ().get_segments ());
 
+  if (!resolved.has_value ())
+    {
+      if (resolved.error ().get_code () == ErrorCode::E0412)
+        {
+	  auto resolved_type = ctx.values.resolve_path (s.get_struct_name ().get_segments ());
+	  if (resolved_type.has_value ())
+	    {
+	      // typechecker will produce the error
+	      resolved = resolved_type;
+	    }
+	}
+    }
+
+  if (!resolved.has_value ())
+    {
+      resolved.error ().emit ();
+      return;
+    }
+
   ctx.map_usage (Usage (s.get_struct_name ().get_node_id ()),
 		 Definition (resolved->get_node_id ()));
 }
