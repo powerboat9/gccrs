@@ -226,11 +226,13 @@ Late::visit (AST::PathInExpression &expr)
 
   rust_debug_loc (expr.get_locus (), "[ARTHUR]: %s", expr.as_simple_path ().as_string ().c_str ());
 
-  tl::expected<Rib::Definition, Error> resolved = ctx.values.resolve_path (expr.get_segments ());
+  tl::expected<Rib::Definition, tl::optional<Error>> resolved = ctx.values.resolve_path (expr.get_segments ());
 
   if (!resolved.has_value ())
     {
-      if (resolved.error ().get_code () == ErrorCode::E0425)
+      if (!resolved.error ().has_value ())
+        return;
+      if (resolved.error ()->get_code () == ErrorCode::E0425)
         {
 	  auto resolved_type = ctx.types.resolve_path (expr.get_segments ());
 	  if (resolved_type.has_value ())
@@ -243,7 +245,7 @@ Late::visit (AST::PathInExpression &expr)
 
   if (!resolved.has_value ())
     {
-      resolved.error ().emit ();
+      resolved.error ()->emit ();
       return;
     }
 
@@ -299,9 +301,9 @@ Late::visit (AST::TypePath &type)
   if (resolved.has_value ())
     ctx.map_usage (Usage (type.get_node_id ()),
 		   Definition (resolved->get_node_id ()));
-  else if (resolved.error ().get_code () != ErrorCode::E0433)
+  else if (resolved.error ().has_value ())
     // typechecker can't resolve it
-    resolved.error ().emit ();
+    resolved.error ()->emit ();
 
   DefaultResolver::visit (type);
 }
@@ -333,7 +335,7 @@ Late::visit (AST::StructExprStruct &s)
 
   if (!resolved.has_value ())
     {
-      if (resolved.error ().get_code () == ErrorCode::E0412)
+      if (!resolved.error ().has_value () || resolved.error ()->get_code () == ErrorCode::E0412)
         {
 	  auto resolved_type = ctx.values.resolve_path (s.get_struct_name ().get_segments ());
 	  if (resolved_type.has_value ())
@@ -346,7 +348,8 @@ Late::visit (AST::StructExprStruct &s)
 
   if (!resolved.has_value ())
     {
-      resolved.error ().emit ();
+      if (resolved.error ().has_value ())
+        resolved.error ()->emit ();
       return;
     }
 
@@ -361,8 +364,9 @@ Late::visit (AST::StructExprStructBase &s)
 
   if (!resolved.has_value ())
     {
-      if (resolved.error ().get_code () == ErrorCode::E0412)
+      if (!resolved.error ().has_value () || resolved.error ()->get_code () == ErrorCode::E0412)
         {
+	  rust_debug_loc (s.get_locus (), "found %d", (int) resolved.error ().map ([] (auto &x) {return (int) x.get_code ();}).value_or (-1));
 	  auto resolved_type = ctx.values.resolve_path (s.get_struct_name ().get_segments ());
 	  if (resolved_type.has_value ())
 	    {
@@ -374,7 +378,8 @@ Late::visit (AST::StructExprStructBase &s)
 
   if (!resolved.has_value ())
     {
-      resolved.error ().emit ();
+      if (resolved.error ().has_value ())
+        resolved.error ()->emit ();
       return;
     }
 
@@ -393,7 +398,7 @@ Late::visit (AST::StructExprStructFields &s)
 
   if (!resolved.has_value ())
     {
-      if (resolved.error ().get_code () == ErrorCode::E0412)
+      if (!resolved.error ().has_value () || resolved.error ()->get_code () == ErrorCode::E0412)
         {
 	  auto resolved_type = ctx.values.resolve_path (s.get_struct_name ().get_segments ());
 	  if (resolved_type.has_value ())
@@ -406,7 +411,8 @@ Late::visit (AST::StructExprStructFields &s)
 
   if (!resolved.has_value ())
     {
-      resolved.error ().emit ();
+      if (resolved.error ().has_value ())
+        resolved.error ()->emit ();
       return;
     }
 

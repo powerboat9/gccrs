@@ -510,7 +510,7 @@ public:
    *         current map, an empty one otherwise.
    */
   template <typename S>
-  tl::expected<Rib::Definition, Error> resolve_path (const std::vector<S> &segments);
+  tl::expected<Rib::Definition, tl::optional<Error>> resolve_path (const std::vector<S> &segments);
 
   // FIXME: Documentation
   tl::optional<Resolver::CanonicalPath> to_canonical_path (NodeId id) const;

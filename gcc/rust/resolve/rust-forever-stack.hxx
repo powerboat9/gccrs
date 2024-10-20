@@ -546,7 +546,7 @@ ForeverStack<N>::error_cannot_find (location_t locus, const std::string &name)
 
 template <Namespace N>
 template <typename S>
-tl::expected<Rib::Definition, Error>
+tl::expected<Rib::Definition, tl::optional<Error>>
 ForeverStack<N>::resolve_path (const std::vector<S> &segments)
 {
   // TODO: What to do if segments.empty() ?
@@ -557,8 +557,8 @@ ForeverStack<N>::resolve_path (const std::vector<S> &segments)
       auto &seg = unwrap_type_segment (segments.back ());
       auto ret = get (seg.as_string ());
       if (!ret.has_value ())
-        return tl::expected<Rib::Definition, Error> (tl::unexpected<Error> (error_cannot_find (seg.get_locus (), seg.as_string ())));
-      return tl::expected<Rib::Definition, Error> (ret.value ());
+        return tl::expected<Rib::Definition, tl::optional<Error>> (tl::unexpected (tl::make_optional (error_cannot_find (seg.get_locus (), seg.as_string ()))));
+      return tl::expected<Rib::Definition, tl::optional<Error>> (ret.value ());
     }
 
   std::reference_wrapper<Node> starting_point = cursor ();
@@ -566,14 +566,19 @@ ForeverStack<N>::resolve_path (const std::vector<S> &segments)
   return find_starting_point (segments, starting_point)
     .and_then ([this, &segments, &starting_point] (
 		 typename std::vector<S>::const_iterator iterator) {
-      return resolve_segments (starting_point.get (), segments, iterator);
+      return resolve_segments (starting_point.get (), segments, iterator).map_error ([] (Error x) { return tl::optional<Error> (std::move (x)); });
     })
     .and_then ([this, &segments] (Node *final_node) {
       auto &seg = unwrap_type_segment (segments.back ());
       auto ret = final_node->rib.get (seg.as_string ());
       if (!ret.has_value ())
-        return tl::expected<Rib::Definition, Error> (tl::unexpected<Error> (error_cannot_find (seg.get_locus (), seg.as_string ())));
-      return tl::expected<Rib::Definition, Error> (ret.value ());
+        {
+	  // typechecker might be able to figure this out
+	  if (final_node->rib.kind == Rib::Kind::Item)
+	    return tl::expected<Rib::Definition, tl::optional<Error>> (tl::unexpected<tl::optional<Error>> (tl::nullopt));
+          return tl::expected<Rib::Definition, tl::optional<Error>> (tl::unexpected (tl::optional<Error> (error_cannot_find (seg.get_locus (), seg.as_string ()))));
+        }
+      return tl::expected<Rib::Definition, tl::optional<Error>> (ret.value ());
     });
 }
 

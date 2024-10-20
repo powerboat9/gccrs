@@ -263,7 +263,8 @@ Early::visit (AST::MacroInvocation &invoc)
 	}
       else
         {
-          collect_error (resolved.error ());
+	  if (resolved.error ().has_value ())
+            collect_error (resolved.error ().value ());
 	  return;
 	}
     }
