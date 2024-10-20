@@ -226,21 +226,24 @@ Late::visit (AST::PathInExpression &expr)
 
   rust_debug_loc (expr.get_locus (), "[ARTHUR]: %s", expr.as_simple_path ().as_string ().c_str ());
 
-  tl::optional<Rib::Definition> resolved = tl::nullopt;
+  tl::expected<Rib::Definition, Error> resolved = ctx.values.resolve_path (expr.get_segments ());
 
-  if (auto value = ctx.values.resolve_path (expr.get_segments ()))
+  if (!resolved.has_value ())
     {
-      resolved = value;
+      if (resolved.error ().get_code () == ErrorCode::E0425)
+        {
+	  auto resolved_type = ctx.types.resolve_path (expr.get_segments ());
+	  if (resolved_type.has_value ())
+	    {
+	      // typechecker will produce the error
+	      resolved = resolved_type;
+	    }
+	}
     }
-  else if (auto type = ctx.types.resolve_path (expr.get_segments ()))
+
+  if (!resolved.has_value ())
     {
-      resolved = type;
-    }
-  else
-    {
-      rust_error_at (expr.get_locus (),
-		     "could not resolve path expression: %qs",
-		     expr.as_simple_path ().as_string ().c_str ());
+      resolved.error ().emit ();
       return;
     }
 
@@ -337,6 +340,25 @@ Late::visit (AST::StructExprStructBase &s)
 {
   auto resolved = ctx.types.resolve_path (s.get_struct_name ().get_segments ());
 
+  if (!resolved.has_value ())
+    {
+      if (resolved.error ().get_code () == ErrorCode::E0412)
+        {
+	  auto resolved_type = ctx.values.resolve_path (s.get_struct_name ().get_segments ());
+	  if (resolved_type.has_value ())
+	    {
+	      // typechecker will produce the error
+	      resolved = resolved_type;
+	    }
+	}
+    }
+
+  if (!resolved.has_value ())
+    {
+      resolved.error ().emit ();
+      return;
+    }
+
   ctx.map_usage (Usage (s.get_struct_name ().get_node_id ()),
 		 Definition (resolved->get_node_id ()));
   DefaultResolver::visit (s);
@@ -346,6 +368,25 @@ void
 Late::visit (AST::StructExprStructFields &s)
 {
   auto resolved = ctx.types.resolve_path (s.get_struct_name ().get_segments ());
+
+  if (!resolved.has_value ())
+    {
+      if (resolved.error ().get_code () == ErrorCode::E0412)
+        {
+	  auto resolved_type = ctx.values.resolve_path (s.get_struct_name ().get_segments ());
+	  if (resolved_type.has_value ())
+	    {
+	      // typechecker will produce the error
+	      resolved = resolved_type;
+	    }
+	}
+    }
+
+  if (!resolved.has_value ())
+    {
+      resolved.error ().emit ();
+      return;
+    }
 
   ctx.map_usage (Usage (s.get_struct_name ().get_node_id ()),
 		 Definition (resolved->get_node_id ()));

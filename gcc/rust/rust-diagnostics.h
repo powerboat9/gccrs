@@ -298,6 +298,8 @@ struct Error
 	break;
       }
   }
+
+  ErrorCode get_code () { return errorcode; }
 };
 } // namespace Rust
 

@@ -510,7 +510,7 @@ public:
    *         current map, an empty one otherwise.
    */
   template <typename S>
-  tl::optional<Rib::Definition> resolve_path (const std::vector<S> &segments);
+  tl::expected<Rib::Definition, Error> resolve_path (const std::vector<S> &segments);
 
   // FIXME: Documentation
   tl::optional<Resolver::CanonicalPath> to_canonical_path (NodeId id) const;
@@ -613,14 +613,17 @@ private:
   Node &find_closest_module (Node &starting_point);
 
   template <typename S>
-  tl::optional<SegIterator<S>>
+  tl::expected<SegIterator<S>, Error>
   find_starting_point (const std::vector<S> &segments,
-		       std::reference_wrapper<Node> &starting_point);
+  		       std::reference_wrapper<Node> &starting_point);
 
   template <typename S>
-  tl::optional<Node &> resolve_segments (Node &starting_point,
+  tl::expected<Node *, Error> resolve_segments (Node &starting_point,
 					 const std::vector<S> &segments,
 					 SegIterator<S> iterator);
+
+  Error
+  error_cannot_find (location_t locus, const std::string &name);
 
   /* Helper functions for forward resolution (to_canonical_path, to_rib...) */
   struct DfsResult

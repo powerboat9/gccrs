@@ -255,15 +255,20 @@ Early::visit (AST::MacroInvocation &invoc)
   // we won't have changed `definition` from `nullopt` if there are more
   // than one segments in our path
   if (!definition.has_value ())
-    definition = ctx.macros.resolve_path (path.get_segments ());
-
-  // if the definition still does not have a value, then it's an error
-  if (!definition.has_value ())
     {
-      collect_error (Error (invoc.get_locus (), ErrorCode::E0433,
-			    "could not resolve macro invocation"));
-      return;
+      auto resolved = ctx.macros.resolve_path (path.get_segments ());
+      if (resolved.has_value ())
+        {
+          definition = resolved.value ();
+	}
+      else
+        {
+          collect_error (resolved.error ());
+	  return;
+	}
     }
+
+  rust_assert (definition.has_value ());
 
   insert_once (invoc, definition->get_node_id ());
 

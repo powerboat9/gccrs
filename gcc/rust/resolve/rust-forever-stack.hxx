@@ -354,16 +354,16 @@ ForeverStack<N>::find_closest_module (Node &starting_point)
 /* If a the given condition is met, emit an error about misused leading path
  * segments */
 template <typename S>
-static inline bool
+static inline tl::optional<Error>
 check_leading_kw_at_start (const S &segment, bool condition)
 {
   if (condition)
-    rust_error_at (
+    return Error (
       segment.get_locus (), ErrorCode::E0433,
-      "leading path segment %qs can only be used at the beginning of a path",
+      "failed to resolve: %qs in paths can only be used in start position",
       segment.as_string ().c_str ());
 
-  return condition;
+  return tl::nullopt;
 }
 
 #define unwrap_type_segment(x)                                                 \
@@ -419,9 +419,9 @@ public:
 // correct one or the root.
 template <Namespace N>
 template <typename S>
-tl::optional<typename std::vector<S>::const_iterator>
-ForeverStack<N>::find_starting_point (
-  const std::vector<S> &segments, std::reference_wrapper<Node> &starting_point)
+tl::expected<typename std::vector<S>::const_iterator, Error>
+ForeverStack<N>::find_starting_point (const std::vector<S> &segments,
+				      std::reference_Wrapper<Node> &starting_point)
 {
   auto iterator = segments.begin ();
 
@@ -440,9 +440,10 @@ ForeverStack<N>::find_starting_point (
 
       // if we're after the first path segment and meet `self` or `crate`, it's
       // an error - we should only be seeing `super` keywords at this point
-      if (check_leading_kw_at_start (seg, !is_start (iterator, segments)
-					    && is_self_or_crate))
-	return tl::nullopt;
+      auto err = check_leading_kw_at_start (seg, !is_start (iterator, segments)
+					    && is_self_or_crate);
+      if (err.has_value ())
+	return tl::expected<typename std::vector<S>::const_iterator, Error> (tl::unexpected<Error> (err.value ()));
 
       if (seg.is_crate_path_seg ())
 	{
@@ -460,9 +461,8 @@ ForeverStack<N>::find_starting_point (
 	{
 	  if (starting_point.get ().is_root ())
 	    {
-	      rust_error_at (seg.get_locus (), ErrorCode::E0433,
-			     "too many leading %<super%> keywords");
-	      return tl::nullopt;
+	      return tl::expected<typename std::vector<S>::const_iterator, Error> (tl::unexpected<Error> (Error (seg.get_locus (), ErrorCode::E0433,
+			     "too many leading %<super%> keywords")));
 	    }
 
 	  starting_point
@@ -476,12 +476,12 @@ ForeverStack<N>::find_starting_point (
       break;
     }
 
-  return iterator;
+  return tl::expected<typename std::vector<S>::const_iterator, Error> (iterator);
 }
 
 template <Namespace N>
 template <typename S>
-tl::optional<typename ForeverStack<N>::Node &>
+tl::expected<typename ForeverStack<N>::Node *, Error>
 ForeverStack<N>::resolve_segments (
   Node &starting_point, const std::vector<S> &segments,
   typename std::vector<S>::const_iterator iterator)
@@ -494,10 +494,11 @@ ForeverStack<N>::resolve_segments (
       rust_debug ("[ARTHUR]: resolving segment part: %s", str.c_str ());
 
       // check that we don't encounter *any* leading keywords afterwards
-      if (check_leading_kw_at_start (seg, seg.is_crate_path_seg ()
+      auto err = check_leading_kw_at_start (seg, seg.is_crate_path_seg ()
 					    || seg.is_super_path_seg ()
-					    || seg.is_lower_self_seg ()))
-	return tl::nullopt;
+					    || seg.is_lower_self_seg ());
+      if (err.has_value ())
+        return tl::expected<typename ForeverStack<N>::Node *, Error> (tl::unexpected<Error> (err.value ()));
 
       tl::optional<typename ForeverStack<N>::Node &> child = tl::nullopt;
 
@@ -519,27 +520,46 @@ ForeverStack<N>::resolve_segments (
 
       if (!child.has_value ())
 	{
-	  rust_error_at (seg.get_locus (), ErrorCode::E0433,
-			 "failed to resolve path segment %qs", str.c_str ());
-	  return tl::nullopt;
+	  return tl::expected<typename ForeverStack<N>::Node *, Error> (tl::unexpected<Error> (Error (seg.get_locus (), ErrorCode::E0433,
+			 "failed to resolve path segment %qs", str.c_str ())));
 	}
 
       current_node = &child.value ();
     }
 
-  return *current_node;
+  return tl::expected<typename ForeverStack<N>::Node *, Error> (&*current_node);
+}
+
+template <Namespace N>
+Error
+ForeverStack<N>::error_cannot_find (location_t locus, const std::string &name)
+{
+  if (N == Namespace::Types)
+    return Error (locus, ErrorCode::E0412, "cannot find type %qs", name.c_str ());
+  else if (N == Namespace::Values)
+    return Error (locus, ErrorCode::E0425, "cannot find value %qs", name.c_str ());
+  else if (N == Namespace::Macros)
+    return Error (locus, ErrorCode::E0433, "cannot find macro %qs", name.c_str ());
+  else
+    rust_unreachable ();
 }
 
 template <Namespace N>
 template <typename S>
-tl::optional<Rib::Definition>
+tl::expected<Rib::Definition, Error>
 ForeverStack<N>::resolve_path (const std::vector<S> &segments)
 {
   // TODO: What to do if segments.empty() ?
 
   // if there's only one segment, we just use `get`
   if (segments.size () == 1)
-    return get (unwrap_type_segment (segments.back ()).as_string ());
+    {
+      auto &seg = unwrap_type_segment (segments.back ());
+      auto ret = get (seg.as_string ());
+      if (!ret.has_value ())
+        return tl::expected<Rib::Definition, Error> (tl::unexpected<Error> (error_cannot_find (seg.get_locus (), seg.as_string ())));
+      return tl::expected<Rib::Definition, Error> (ret.value ());
+    }
 
   std::reference_wrapper<Node> starting_point = cursor ();
 
@@ -548,9 +568,12 @@ ForeverStack<N>::resolve_path (const std::vector<S> &segments)
 		 typename std::vector<S>::const_iterator iterator) {
       return resolve_segments (starting_point.get (), segments, iterator);
     })
-    .and_then ([&segments] (Node final_node) {
-      return final_node.rib.get (
-	unwrap_type_segment (segments.back ()).as_string ());
+    .and_then ([this, &segments] (Node *final_node) {
+      auto &seg = unwrap_type_segment (segments.back ());
+      auto ret = final_node->rib.get (seg.as_string ());
+      if (!ret.has_value ())
+        return tl::expected<Rib::Definition, Error> (tl::unexpected<Error> (error_cannot_find (seg.get_locus (), seg.as_string ())));
+      return tl::expected<Rib::Definition, Error> (ret.value ());
     });
 }
 
