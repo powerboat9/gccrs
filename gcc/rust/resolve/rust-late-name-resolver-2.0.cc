@@ -299,7 +299,8 @@ Late::visit (AST::TypePath &type)
   if (resolved.has_value ())
     ctx.map_usage (Usage (type.get_node_id ()),
 		   Definition (resolved->get_node_id ()));
-  else
+  else if (resolved.error ().get_code () != ErrorCode::E0433)
+    // typechecker can't resolve it
     resolved.error ().emit ();
 
   DefaultResolver::visit (type);
