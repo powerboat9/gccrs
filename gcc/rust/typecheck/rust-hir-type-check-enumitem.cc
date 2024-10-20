@@ -87,7 +87,7 @@ TypeCheckEnumItem::visit (HIR::EnumItem &item)
 	= Resolver2_0::ImmutableNameResolutionContext::get ().resolver ();
 
       canonical_path
-	= nr_ctx.types.to_canonical_path (item.get_mappings ().get_nodeid ());
+	= nr_ctx.values.to_canonical_path (item.get_mappings ().get_nodeid ());
     }
   else
     {
@@ -131,7 +131,7 @@ TypeCheckEnumItem::visit (HIR::EnumItemDiscriminant &item)
 	= Resolver2_0::ImmutableNameResolutionContext::get ().resolver ();
 
       canonical_path
-	= nr_ctx.types.to_canonical_path (item.get_mappings ().get_nodeid ());
+	= nr_ctx.values.to_canonical_path (item.get_mappings ().get_nodeid ());
     }
   else
     {
@@ -192,7 +192,7 @@ TypeCheckEnumItem::visit (HIR::EnumItemTuple &item)
 	= Resolver2_0::ImmutableNameResolutionContext::get ().resolver ();
 
       canonical_path
-	= nr_ctx.types.to_canonical_path (item.get_mappings ().get_nodeid ());
+	= nr_ctx.values.to_canonical_path (item.get_mappings ().get_nodeid ());
     }
   else
     {
@@ -252,7 +252,7 @@ TypeCheckEnumItem::visit (HIR::EnumItemStruct &item)
 	= Resolver2_0::ImmutableNameResolutionContext::get ().resolver ();
 
       canonical_path
-	= nr_ctx.types.to_canonical_path (item.get_mappings ().get_nodeid ());
+	= nr_ctx.values.to_canonical_path (item.get_mappings ().get_nodeid ());
     }
   else
     {

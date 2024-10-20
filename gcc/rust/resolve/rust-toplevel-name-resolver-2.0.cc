@@ -323,25 +323,25 @@ TopLevel::visit (AST::TupleStruct &tuple_struct)
 void
 TopLevel::visit (AST::EnumItem &variant)
 {
-  insert_or_error_out (variant.get_identifier (), variant, Namespace::Types);
+  insert_or_error_out (variant.get_identifier (), variant, Namespace::Values);
 }
 
 void
 TopLevel::visit (AST::EnumItemTuple &variant)
 {
-  insert_or_error_out (variant.get_identifier (), variant, Namespace::Types);
+  insert_or_error_out (variant.get_identifier (), variant, Namespace::Values);
 }
 
 void
 TopLevel::visit (AST::EnumItemStruct &variant)
 {
-  insert_or_error_out (variant.get_identifier (), variant, Namespace::Types);
+  insert_or_error_out (variant.get_identifier (), variant, Namespace::Values);
 }
 
 void
 TopLevel::visit (AST::EnumItemDiscriminant &variant)
 {
-  insert_or_error_out (variant.get_identifier (), variant, Namespace::Types);
+  insert_or_error_out (variant.get_identifier (), variant, Namespace::Values);
 }
 
 void
