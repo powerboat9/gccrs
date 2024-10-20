@@ -27,5 +27,5 @@ fn test() {
 
 fn main() {
     test();
-    // { dg-error "could not resolve path expression: .test." "" { target *-*-* } .-1 }
+    // { dg-error "cannot find value .test." "" { target *-*-* } .-1 }
 }

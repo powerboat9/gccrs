@@ -13,5 +13,5 @@ pub mod foo {
     }
 }
 
-crate::foo::bar::baz::qux::foo!(); // { dg-error "could not resolve macro invocation" }
-foo::bar::baz::qux::foo!(); // { dg-error "could not resolve macro invocation" }
+crate::foo::bar::baz::qux::foo!(); // { dg-error "cannot find macro .foo." }
+foo::bar::baz::qux::foo!(); // { dg-error "cannot find macro .foo." }
