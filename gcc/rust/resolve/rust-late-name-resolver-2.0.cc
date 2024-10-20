@@ -361,7 +361,10 @@ Late::visit (AST::StructExprStructBase &s)
 
   ctx.map_usage (Usage (s.get_struct_name ().get_node_id ()),
 		 Definition (resolved->get_node_id ()));
-  DefaultResolver::visit (s);
+
+  // we shouldn't visit PathInExpression
+  // probably fine to skip attributes as well
+  visit (s.get_struct_base ());
 }
 
 void
@@ -391,7 +394,12 @@ Late::visit (AST::StructExprStructFields &s)
   ctx.map_usage (Usage (s.get_struct_name ().get_node_id ()),
 		 Definition (resolved->get_node_id ()));
 
-  DefaultResolver::visit (s);
+  // we shouldn't visit PathInExpression
+  // probably fine to skip attributes as well
+  if (s.has_struct_base ())
+    visit (s.get_struct_base ());
+  for (auto &field : s.get_fields ())
+    visit (field);
 }
 
 // needed because Late::visit (AST::GenericArg &) is non-virtual
