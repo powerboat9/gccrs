@@ -366,6 +366,52 @@ check_leading_kw_at_start (const S &segment, bool condition)
   return condition;
 }
 
+#define unwrap_type_segment(x)                                                 \
+  (unwrap_type_segment_inner<typename std::remove_const<                       \
+     typename std::remove_reference<decltype (x)>::type>::type>::unwrap (x))
+
+template <class T> class unwrap_type_segment_inner;
+
+template <> class unwrap_type_segment_inner<AST::SimplePathSegment>
+{
+public:
+  using ret = AST::SimplePathSegment;
+
+  static AST::SimplePathSegment &unwrap (AST::SimplePathSegment &x)
+  {
+    return x;
+  }
+
+  static const AST::SimplePathSegment &unwrap (const AST::SimplePathSegment &x)
+  {
+    return x;
+  }
+};
+
+template <class T> class unwrap_type_segment_inner<std::unique_ptr<T>>
+{
+public:
+  using ret = typename unwrap_type_segment_inner<T>::ret;
+
+  static ret &unwrap (std::unique_ptr<T> &x)
+  {
+    return unwrap_type_segment (*x);
+  }
+  static const ret &unwrap (const std::unique_ptr<T> &x)
+  {
+    return unwrap_type_segment (*x);
+  }
+};
+
+template <class T> class unwrap_type_segment_inner
+{
+public:
+  using ret = AST::PathIdentSegment;
+
+  static ret &unwrap (T &x) { return x.get_ident_segment (); }
+  static const ret &unwrap (const T &x) { return x.get_ident_segment (); }
+};
+
 // we first need to handle the "starting" segments - `super`, `self` or
 // `crate`. we don't need to do anything for `self` and can just skip it. for
 // `crate`, we need to go back to the root of the current stack. for each
@@ -388,7 +434,7 @@ ForeverStack<N>::find_starting_point (
 
   for (; !is_last (iterator, segments); iterator++)
     {
-      auto &seg = *iterator;
+      auto &seg = unwrap_type_segment (*iterator);
       auto is_self_or_crate
 	= seg.is_crate_path_seg () || seg.is_lower_self_seg ();
 
@@ -443,7 +489,7 @@ ForeverStack<N>::resolve_segments (
   auto *current_node = &starting_point;
   for (; !is_last (iterator, segments); iterator++)
     {
-      auto &seg = *iterator;
+      auto &seg = unwrap_type_segment (*iterator);
       auto str = seg.as_string ();
       rust_debug ("[ARTHUR]: resolving segment part: %s", str.c_str ());
 
@@ -493,7 +539,7 @@ ForeverStack<N>::resolve_path (const std::vector<S> &segments)
 
   // if there's only one segment, we just use `get`
   if (segments.size () == 1)
-    return get (segments.back ().as_string ());
+    return get (unwrap_type_segment (segments.back ()).as_string ());
 
   std::reference_wrapper<Node> starting_point = cursor ();
 
@@ -503,7 +549,8 @@ ForeverStack<N>::resolve_path (const std::vector<S> &segments)
       return resolve_segments (starting_point.get (), segments, iterator);
     })
     .and_then ([&segments] (Node final_node) {
-      return final_node.rib.get (segments.back ().as_string ());
+      return final_node.rib.get (
+	unwrap_type_segment (segments.back ()).as_string ());
     });
 }
 

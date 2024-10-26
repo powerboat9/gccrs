@@ -12,7 +12,6 @@ cfg3.rs
 cfg4.rs
 cfg5.rs
 closure_no_type_anno.rs
-complex-path1.rs
 const-issue1440.rs
 const_generics_3.rs
 const_generics_4.rs
@@ -24,7 +23,6 @@ expected_type_args2.rs
 feature_rust_attri0.rs
 format_args_basic_expansion.rs
 generic-default1.rs
-generics1.rs
 generics10.rs
 generics11.rs
 generics3.rs
@@ -53,7 +51,6 @@ issue-2330.rs
 issue-2479.rs
 issue-2723-1.rs
 issue-2723-2.rs
-issue-2772-2.rs
 issue-2775.rs
 issue-2782.rs
 issue-2812.rs
@@ -64,6 +61,7 @@ iterators1.rs
 lookup_err1.rs
 macros/mbe/macro13.rs
 macros/mbe/macro15.rs
+macros/mbe/macro20.rs
 macros/mbe/macro23.rs
 macros/mbe/macro40.rs
 macros/mbe/macro43.rs
@@ -116,7 +114,6 @@ struct-expr-parse.rs
 traits3.rs
 traits6.rs
 traits7.rs
-type-bindings1.rs
 unconstrained_type_param.rs
 undeclared_label.rs
 use_1.rs
@@ -148,4 +145,17 @@ additional-trait-bounds2.rs
 auto_traits3.rs
 issue-3140.rs
 cmp1.rs
+issue-2190-1.rs
+issue-2190-2.rs
+issue-2105.rs
+issue-2019-1.rs
+issue-2019-2.rs
+issue-2019-3.rs
+issue-1034.rs
+issue-1019.rs
+issue-2304.rs
+issue-2747.rs
+issue-2953-1.rs
+issue-3030.rs
+traits12.rs
 # please don't delete the trailing newline

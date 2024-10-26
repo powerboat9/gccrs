@@ -285,15 +285,20 @@ Late::visit (AST::TypePath &type)
   // maybe we can overload `resolve_path<Namespace::Types>` to only do
   // typepath-like path resolution? that sounds good
 
-  auto str = type.get_segments ().back ()->get_ident_segment ().as_string ();
-  auto values = ctx.types.peek ().get_values ();
+  // take care of only simple cases
+  // TODO: remove this?
+  rust_assert (!type.has_opening_scope_resolution_op ());
 
-  if (auto resolved = ctx.types.get (str))
+  // this *should* mostly work
+  // TODO: make sure typepath-like path resolution (?) is working
+  auto resolved = ctx.types.resolve_path (type.get_segments ());
+
+  if (resolved.has_value ())
     ctx.map_usage (Usage (type.get_node_id ()),
 		   Definition (resolved->get_node_id ()));
   else
     rust_error_at (type.get_locus (), "could not resolve type path %qs",
-		   str.c_str ());
+		   type.get_segments ().back ()->get_ident_segment ().as_string ().c_str ());
 
   DefaultResolver::visit (type);
 }
