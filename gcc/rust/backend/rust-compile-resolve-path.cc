@@ -111,6 +111,7 @@ ResolvePathRef::resolve (const HIR::PathIdentSegment &final_segment,
 
       auto resolved = nr_ctx.lookup (mappings.get_nodeid ());
       rust_assert (resolved.has_value ());
+
       ref_node_id = *resolved;
     }
   else
