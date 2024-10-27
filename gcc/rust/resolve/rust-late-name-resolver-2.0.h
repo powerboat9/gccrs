@@ -51,6 +51,7 @@ public:
   void visit (AST::TypePath &) override;
   void visit (AST::Trait &) override;
   void visit (AST::TraitImpl &) override;
+  void visit (AST::InherentImpl &) override;
   void visit (AST::StructExprStruct &) override;
   void visit (AST::StructExprStructBase &) override;
   void visit (AST::StructExprStructFields &) override;

@@ -333,6 +333,19 @@ Late::visit (AST::TraitImpl &impl)
 }
 
 void
+Late::visit (AST::InherentImpl &impl)
+{
+  auto impl_vis = [this, &impl] () {
+    std::ignore
+      = ctx.types.insert (Identifier ("Self", impl.get_type ().get_locus ()),
+			  impl.get_type ().get_node_id ());
+    AST::DefaultASTVisitor::visit (impl);
+  };
+
+  ctx.scoped (Rib::Kind::TraitOrImpl, impl.get_node_id (), impl_vis);
+}
+
+void
 Late::visit (AST::StructStruct &s)
 {
   auto s_vis = [this, &s] () { AST::DefaultASTVisitor::visit (s); };
