@@ -164,7 +164,7 @@ void
 DefaultASTVisitor::visit (AST::TypePath &path)
 {
   for (auto &segment : path.get_segments ())
-    visit (segment);
+    segment->accept_vis (*this);
 }
 
 void
