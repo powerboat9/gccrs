@@ -42,6 +42,7 @@ public:
   // void visit (AST::Method &) override;
   void visit (AST::IdentifierPattern &) override;
   void visit (AST::SelfParam &) override;
+  void visit (AST::TypeParam &) override;
 
   // resolutions
   void visit (AST::IdentifierExpr &) override;
