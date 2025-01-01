@@ -309,12 +309,14 @@ void
 TopLevel::visit (AST::EnumItem &variant)
 {
   insert_or_error_out (variant.get_identifier (), variant, Namespace::Types);
+  insert_or_error_out (variant.get_identifier (), variant, Namespace::Values);
 }
 
 void
 TopLevel::visit (AST::EnumItemTuple &variant)
 {
   insert_or_error_out (variant.get_identifier (), variant, Namespace::Types);
+  insert_or_error_out (variant.get_identifier (), variant, Namespace::Values);
 }
 
 void
@@ -327,6 +329,7 @@ void
 TopLevel::visit (AST::EnumItemDiscriminant &variant)
 {
   insert_or_error_out (variant.get_identifier (), variant, Namespace::Types);
+  insert_or_error_out (variant.get_identifier (), variant, Namespace::Values);
 }
 
 void
