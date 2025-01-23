@@ -21,6 +21,7 @@
 #include "rust-diagnostics.h"
 #include "rust-forever-stack.h"
 #include "rust-rib.h"
+#include "rust-unwrap-segment.h"
 #include "optional.h"
 
 namespace Rust {
@@ -388,7 +389,7 @@ ForeverStack<N>::find_starting_point (
 
   for (; !is_last (iterator, segments); iterator++)
     {
-      auto &seg = *iterator;
+      auto &seg = unwrap_type_segment (*iterator);
       auto is_self_or_crate
 	= seg.is_crate_path_seg () || seg.is_lower_self_seg ();
 
@@ -443,7 +444,7 @@ ForeverStack<N>::resolve_segments (
   auto *current_node = &starting_point;
   for (; !is_last (iterator, segments); iterator++)
     {
-      auto &seg = *iterator;
+      auto &seg = unwrap_type_segment (*iterator);
       auto str = seg.as_string ();
       rust_debug ("[ARTHUR]: resolving segment part: %s", str.c_str ());
 
@@ -493,7 +494,7 @@ ForeverStack<N>::resolve_path (const std::vector<S> &segments)
 
   // if there's only one segment, we just use `get`
   if (segments.size () == 1)
-    return get (segments.back ().as_string ());
+    return get (unwrap_type_segment (segments.back ()).as_string ());
 
   std::reference_wrapper<Node> starting_point = cursor ();
 
@@ -503,7 +504,8 @@ ForeverStack<N>::resolve_path (const std::vector<S> &segments)
       return resolve_segments (starting_point.get (), segments, iterator);
     })
     .and_then ([&segments] (Node final_node) {
-      return final_node.rib.get (segments.back ().as_string ());
+      return final_node.rib.get (
+	unwrap_type_segment (segments.back ()).as_string ());
     });
 }
 
