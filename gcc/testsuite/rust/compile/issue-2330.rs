@@ -1,4 +1,4 @@
-// { dg-options "-w" }
+// { dg-options "-w -frust-edition=2018" }
 #![feature(intrinsics)]
 
 pub use option::Option::{self, None, Some};
