@@ -1,3 +1,4 @@
+// { dg-additional-options "-frust-edition=2018" }
 #![feature(negative_impls)]
 
 #[lang = "copy"]

@@ -1,3 +1,4 @@
+// { dg-additional-options "-frust-edition=2018" }
 // { dg-output "loop\r*\nloop\r*\n" }
 #![feature(intrinsics)]
 
