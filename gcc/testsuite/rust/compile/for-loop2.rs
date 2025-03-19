@@ -1,3 +1,4 @@
+// { dg-additional-options "-frust-edition=2018" }
 // { dg-output "1\r*\n2\r*\n" }
 #![feature(intrinsics)]
 

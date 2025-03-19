@@ -1,3 +1,4 @@
+// { dg-additional-options "-frust-edition=2018" }
 #![feature(intrinsics)]
 
 pub use option::Option::{self, None, Some};

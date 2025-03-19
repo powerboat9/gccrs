@@ -1,3 +1,4 @@
+// { dg-additional-options "-frust-edition=2018" }
 #[lang = "sized"]
 pub trait Sized {}
 
