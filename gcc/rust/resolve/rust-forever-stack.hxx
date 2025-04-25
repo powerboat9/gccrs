@@ -683,7 +683,7 @@ ForeverStack<N>::resolve_path (
 	      // TODO: does NonShadowable matter?
 	      return Rib::Definition::NonShadowable (root.id);
 	    }
-	  else if (seg.is_lower_self_seg ())
+	  else if (/* seg.is_lower_self_seg () */ false)
 	    {
 	      NodeId id = find_closest_module (cursor_reference.get ()).id;
 	      insert_segment_resolution (outer_seg, id);
