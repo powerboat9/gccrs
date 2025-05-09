@@ -3,4 +3,6 @@ pub_restricted_1.rs
 pub_restricted_2.rs
 torture/alt_patterns1.rs
 issue-3671.rs
+../execute/torture/closure4.rs
+../execute/torture/derive-partialeq2.rs
 # please don't delete the trailing newline
