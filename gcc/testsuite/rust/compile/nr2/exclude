@@ -3,4 +3,23 @@ pub_restricted_1.rs
 pub_restricted_2.rs
 torture/alt_patterns1.rs
 issue-3671.rs
+../execute/same_field_name.rs
+../execute/torture/builtin_abort.rs
+../execute/torture/closure4.rs
+../execute/torture/derive-partialeq2.rs
+../execute/torture/for-loop1.rs
+../execute/torture/for-loop2.rs
+../execute/torture/iflet.rs
+../execute/torture/iter1.rs
+../borrowck/position_dependant_outlives.rs
+../borrowck/reference.rs
+../borrowck/return_ref_to_local.rs
+../borrowck/subset.rs
+../borrowck/test_move.rs
+../borrowck/test_move_behind_reference.rs
+../borrowck/test_move_conditional.rs
+../borrowck/tmp.rs
+../borrowck/use_while_mut.rs
+../borrowck/use_while_mut_fr.rs
+../borrowck/well_formed_function_inputs.rs
 # please don't delete the trailing newline

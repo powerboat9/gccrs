@@ -51,7 +51,7 @@ namespace eval rust-nr2-ns {
     # Run tests in directories
     # Manually specifying these, in case some other test file
     # does something weird
-    set test_dirs {{} {macros builtin} {macros mbe} {macros proc} {torture}}
+    set test_dirs {{} {macros builtin} {macros mbe} {macros proc} {torture} {.. execute} {.. execute torture} {.. borrowck}}
 
     set tests_expect_ok ""
     set tests_expect_err ""
