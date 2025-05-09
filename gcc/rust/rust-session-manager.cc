@@ -622,6 +622,14 @@ Session::compile_crate (const char *filename)
   AST::DesugarQuestionMark ().go (parsed_crate);
   AST::DesugarApit ().go (parsed_crate);
 
+  // HACK: run a final toplevel pass
+  // since desugaring may have added definitions
+  if (!saw_errors () && flag_name_resolution_2_0)
+    {
+      Resolver2_0::TopLevel toplevel (name_resolution_ctx);
+      toplevel.go (parsed_crate);
+    }
+
   rust_debug ("\033[0;31mSUCCESSFULLY FINISHED EXPANSION \033[0m");
   if (options.dump_option_enabled (CompileOptions::EXPANSION_DUMP))
     {
