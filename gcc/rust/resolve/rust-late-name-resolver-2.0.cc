@@ -146,19 +146,13 @@ Late::visit (AST::ForLoopExpr &expr)
 }
 
 void
-Late::visit (AST::IfLetExpr &expr)
+Late::visit_if_let_patterns (AST::IfLetExpr &expr)
 {
-  visit_outer_attrs (expr);
-
   ctx.bindings.enter (BindingSource::Let);
 
-  for (auto &pattern : expr.get_patterns ())
-    visit (pattern);
+  DefaultResolver::visit_if_let_patterns (expr);
 
   ctx.bindings.exit ();
-
-  visit (expr.get_value_expr ());
-  visit (expr.get_if_block ());
 }
 
 void

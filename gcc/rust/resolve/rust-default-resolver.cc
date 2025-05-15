@@ -89,6 +89,28 @@ DefaultResolver::visit (AST::ForLoopExpr &expr)
 }
 
 void
+DefaultResolver::visit_if_let_patterns (AST::IfLetExpr &expr)
+{
+  for (auto &pattern : expr.get_patterns ())
+    visit (pattern);
+}
+
+void
+DefaultResolver::visit (AST::IfLetExpr &expr)
+{
+  auto inner_vis = [this, &expr] () {
+    visit_if_let_patterns (expr);
+    visit (expr.get_if_block ());
+  };
+
+  visit_outer_attrs (expr);
+
+  visit (expr.get_value_expr ());
+
+  ctx.scoped (Rib::Kind::Normal, expr.get_node_id (), inner_vis);
+}
+
+void
 DefaultResolver::visit (AST::Trait &trait)
 {
   visit_outer_attrs (trait);
