@@ -697,7 +697,7 @@ ForeverStack<N>::resolve_path (
 	    }
 	  else if (seg.is_lower_self_seg ())
 	    {
-	      NodeId id = find_closest_module (cursor_reference.get ()).id;
+	      NodeId id = find_closest_module (starting_point.get ()).id;
 	      insert_segment_resolution (outer_seg, id);
 	      // TODO: does NonShadowable matter?
 	      return Rib::Definition::NonShadowable (id);
@@ -705,7 +705,7 @@ ForeverStack<N>::resolve_path (
 	  else if (seg.is_super_path_seg ())
 	    {
 	      Node &closest_module
-		= find_closest_module (cursor_reference.get ());
+		= find_closest_module (starting_point.get ());
 	      if (closest_module.is_root ())
 		{
 		  rust_error_at (seg.get_locus (), ErrorCode::E0433,
