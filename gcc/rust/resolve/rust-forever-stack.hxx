@@ -719,6 +719,26 @@ ForeverStack<N>::resolve_path (
 	      // TODO: does NonShadowable matter?
 	      return Rib::Definition::NonShadowable (id);
 	    }
+	  else
+	    {
+	      // HACK: check for a module after we check the language prelude
+	      for (auto &kv :
+		   find_closest_module (starting_point.get ()).children)
+		{
+		  auto &link = kv.first;
+
+		  if (link.path.map_or (
+			[&seg] (Identifier path) {
+			  auto &path_str = path.as_string ();
+			  return path_str == seg.as_string ();
+			},
+			false))
+		    {
+		      insert_segment_resolution (outer_seg, kv.second.id);
+		      return Rib::Definition::NonShadowable (kv.second.id);
+		    }
+		}
+	    }
 	}
 
       if (res && !res->is_ambiguous ())
@@ -750,6 +770,26 @@ ForeverStack<N>::resolve_path (
       // Ok we didn't find it in the rib, Lets try the prelude...
       if (!res)
 	res = get_lang_prelude (seg_name);
+
+      if (!res)
+	{
+	  // HACK: check for a module after we check the language prelude
+	  for (auto &kv : final_node.children)
+	    {
+	      auto &link = kv.first;
+
+	      if (link.path.map_or (
+		    [&seg_name] (Identifier path) {
+		      auto &path_str = path.as_string ();
+		      return path_str == seg_name;
+		    },
+		    false))
+		{
+		  insert_segment_resolution (segments.back (), kv.second.id);
+		  return Rib::Definition::NonShadowable (kv.second.id);
+		}
+	    }
+	}
 
       if (res && !res->is_ambiguous ())
 	insert_segment_resolution (segments.back (), res->get_node_id ());
