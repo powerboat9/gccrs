@@ -28,6 +28,9 @@
 #include "rust-ast-lower-block.h"
 #include "rust-item.h"
 
+// for flag_name_resolution_2_0
+#include "options.h"
+
 namespace Rust {
 namespace HIR {
 
@@ -730,6 +733,26 @@ void
 ASTLoweringItem::visit (AST::MacroRulesDefinition &def)
 {
   lower_macro_definition (def);
+}
+
+void
+ASTLoweringItem::visit (AST::ExternCrate &extern_crate)
+{
+  // if name resolution 1.0 is enabled, this was done earlier
+  if (!flag_name_resolution_2_0)
+    return;
+
+  auto &mappings = Analysis::Mappings::get ();
+  CrateNum num
+    = mappings.lookup_crate_name (extern_crate.get_referenced_crate ())
+	.value ();
+  AST::Crate &crate = mappings.get_ast_crate (num);
+
+  auto saved_crate_num = mappings.get_current_crate ();
+  mappings.set_current_crate (num);
+  auto lowered = ASTLowering::Resolve (crate);
+  mappings.insert_hir_crate (std::move (lowered));
+  mappings.set_current_crate (saved_crate_num);
 }
 
 HIR::SimplePath

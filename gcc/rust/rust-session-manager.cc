@@ -1189,16 +1189,21 @@ Session::load_extern_crate (const std::string &crate_name, location_t locus)
   mappings.insert_bang_proc_macros (crate_num, bang_macros);
   mappings.insert_derive_proc_macros (crate_num, derive_macros);
 
-  // name resolve it
-  Resolver::NameResolution::Resolve (parsed_crate);
+  // if flag_name_resolution_2_0 is enabled
+  // then we perform resolution/lowering/type checking later
+  if (!flag_name_resolution_2_0)
+    {
+      // name resolve it
+      Resolver::NameResolution::Resolve (parsed_crate);
 
-  // perform hir lowering
-  std::unique_ptr<HIR::Crate> lowered
-    = HIR::ASTLowering::Resolve (parsed_crate);
-  HIR::Crate &hir = mappings.insert_hir_crate (std::move (lowered));
+      // perform hir lowering
+      std::unique_ptr<HIR::Crate> lowered
+	= HIR::ASTLowering::Resolve (parsed_crate);
+      HIR::Crate &hir = mappings.insert_hir_crate (std::move (lowered));
 
-  // perform type resolution
-  Resolver::TypeResolution::Resolve (hir);
+      // perform type resolution
+      Resolver::TypeResolution::Resolve (hir);
+    }
 
   // always restore the crate_num
   mappings.set_current_crate (saved_crate_num);
