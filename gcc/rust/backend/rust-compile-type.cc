@@ -504,32 +504,23 @@ TyTyResolveCompile::visit (const TyTy::IntType &type)
   switch (type.get_int_kind ())
     {
     case TyTy::IntType::I8:
-      translated = Backend::named_type ("i8", Backend::integer_type (false, 8),
-					BUILTINS_LOCATION);
+      translated = Backend::rust_int_trees[5];
       return;
 
     case TyTy::IntType::I16:
-      translated
-	= Backend::named_type ("i16", Backend::integer_type (false, 16),
-			       BUILTINS_LOCATION);
+      translated = Backend::rust_int_trees[6];
       return;
 
     case TyTy::IntType::I32:
-      translated
-	= Backend::named_type ("i32", Backend::integer_type (false, 32),
-			       BUILTINS_LOCATION);
+      translated = Backend::rust_int_trees[7];
       return;
 
     case TyTy::IntType::I64:
-      translated
-	= Backend::named_type ("i64", Backend::integer_type (false, 64),
-			       BUILTINS_LOCATION);
+      translated = Backend::rust_int_trees[8];
       return;
 
     case TyTy::IntType::I128:
-      translated
-	= Backend::named_type ("i128", Backend::integer_type (false, 128),
-			       BUILTINS_LOCATION);
+      translated = Backend::rust_int_trees[9];
       return;
     }
 }
@@ -540,29 +531,23 @@ TyTyResolveCompile::visit (const TyTy::UintType &type)
   switch (type.get_uint_kind ())
     {
     case TyTy::UintType::U8:
-      translated = Backend::named_type ("u8", Backend::integer_type (true, 8),
-					BUILTINS_LOCATION);
+      translated = Backend::rust_int_trees[0];
       return;
 
     case TyTy::UintType::U16:
-      translated = Backend::named_type ("u16", Backend::integer_type (true, 16),
-					BUILTINS_LOCATION);
+      translated = Backend::rust_int_trees[1];
       return;
 
     case TyTy::UintType::U32:
-      translated = Backend::named_type ("u32", Backend::integer_type (true, 32),
-					BUILTINS_LOCATION);
+      translated = Backend::rust_int_trees[2];
       return;
 
     case TyTy::UintType::U64:
-      translated = Backend::named_type ("u64", Backend::integer_type (true, 64),
-					BUILTINS_LOCATION);
+      translated = Backend::rust_int_trees[3];
       return;
 
     case TyTy::UintType::U128:
-      translated
-	= Backend::named_type ("u128", Backend::integer_type (true, 128),
-			       BUILTINS_LOCATION);
+      translated = Backend::rust_int_trees[4];
       return;
     }
 }

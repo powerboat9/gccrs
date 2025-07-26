@@ -50,6 +50,9 @@ using Rust::GGC::Ident;
 
 } // namespace GGC
 
+extern tree rust_int_trees[10];
+extern const char *rust_int_names[10];
+
 void init ();
 
 // Name/type/location.  Used for function parameters, struct fields,
