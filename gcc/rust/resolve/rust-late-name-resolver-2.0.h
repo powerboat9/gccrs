@@ -79,6 +79,9 @@ private:
 
   /* used to prevent "impl Self {}", "impl (Self, i32) {}", etc */
   bool block_big_self;
+
+  /* used to help conversion from IdentifierPattern to PathInExpression */
+  std::map<Usage, Definition> expected_mappings;
 };
 
 // TODO: Add missing mappings and data structures

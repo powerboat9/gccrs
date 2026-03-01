@@ -335,6 +335,8 @@ TypeCheckExpr::resolve_root_path (HIR::PathInExpression &expr, size_t *offset,
 	= mappings.lookup_hir_enumitem (ref);
       bool is_enum_item = enum_item_lookup.first != nullptr
 			  && enum_item_lookup.second != nullptr;
+      rust_debug_loc (mappings.lookup_location (ref), "is enum? %s",
+		      is_enum_item ? "yes" : "no");
       if (is_enum_item)
 	{
 	  HirId expr_id = expr.get_mappings ().get_hirid ();

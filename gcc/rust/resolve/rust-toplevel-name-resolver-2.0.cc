@@ -309,6 +309,8 @@ TopLevel::visit (AST::TupleStruct &tuple_struct)
 void
 TopLevel::visit (AST::EnumItem &variant)
 {
+  rust_debug_loc (variant.get_locus (), "ITEM %d",
+		  (int) variant.get_node_id ());
   insert_enum_variant_or_error_out (variant.get_identifier (), variant);
 
   DefaultResolver::visit (variant);
@@ -317,6 +319,8 @@ TopLevel::visit (AST::EnumItem &variant)
 void
 TopLevel::visit (AST::EnumItemTuple &variant)
 {
+  rust_debug_loc (variant.get_locus (), "ITEM %d",
+		  (int) variant.get_node_id ());
   insert_enum_variant_or_error_out (variant.get_identifier (), variant);
 
   DefaultResolver::visit (variant);
@@ -325,6 +329,8 @@ TopLevel::visit (AST::EnumItemTuple &variant)
 void
 TopLevel::visit (AST::EnumItemStruct &variant)
 {
+  rust_debug_loc (variant.get_locus (), "ITEM %d",
+		  (int) variant.get_node_id ());
   insert_enum_variant_or_error_out (variant.get_identifier (), variant);
 
   DefaultResolver::visit (variant);
@@ -333,6 +339,8 @@ TopLevel::visit (AST::EnumItemStruct &variant)
 void
 TopLevel::visit (AST::EnumItemDiscriminant &variant)
 {
+  rust_debug_loc (variant.get_locus (), "ITEM %d",
+		  (int) variant.get_node_id ());
   insert_or_error_out (variant.get_identifier (), variant, Namespace::Types);
 
   DefaultResolver::visit (variant);

@@ -31,6 +31,7 @@
 #include "rust-hir-type-check.h"
 #include "rust-ice-finalizer.h"
 #include "rust-ast.h"
+#include "rust-identifier-path.h"
 
 namespace Rust {
 namespace Resolver2_0 {
@@ -45,6 +46,8 @@ Late::go (AST::Crate &crate)
   Builtins::setup_type_ctx ();
 
   visit (crate);
+
+  IdentifierPathPass::go (crate, ctx, std::move (expected_mappings));
 }
 
 void
@@ -203,6 +206,28 @@ void
 Late::visit (AST::IdentifierPattern &identifier)
 {
   DefaultResolver::visit (identifier);
+
+  // check if this is *really* a path pattern
+  if (!identifier.get_is_ref () && !identifier.get_is_mut ()
+      && !identifier.has_subpattern ())
+    {
+      auto res = ctx.values.get (identifier.get_ident ());
+      if (res)
+	{
+	  rust_debug_loc (identifier.get_locus (), "RESOLVING %d to %d",
+			  (int) identifier.get_node_id (),
+			  (int) res->get_node_id ());
+	  if (res->is_ambiguous ())
+	    rust_error_at (identifier.get_locus (), ErrorCode::E0659,
+			   "%qs is ambiguous",
+			   identifier.get_ident ().as_string ().c_str ());
+	  else
+	    expected_mappings.insert (
+	      std::make_pair (Usage (identifier.get_node_id ()),
+			      Definition (res->get_node_id ())));
+	  return;
+	}
+    }
 
   visit_identifier_as_pattern (ctx, identifier.get_ident (),
 			       identifier.get_locus (),
